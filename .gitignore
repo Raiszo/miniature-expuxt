@@ -1,3 +1,13 @@
+# Nuxt threw up :P
+.nuxt/
+
+# emacs files
+*~
+\#*\#
+.\#*
+/server/
+.tern-port
+
 # Logs
 logs
 *.log
