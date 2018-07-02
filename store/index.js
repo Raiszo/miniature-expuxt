@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import axios from 'axios'
+import axios from '~/plugins/axios'
 import Cookie from 'js-cookie'
 
 Vue.use(Vuex)
@@ -8,40 +8,21 @@ Vue.use(Vuex)
 // Polyfill for `window.fetch()`
 const store = () => new Vuex.Store({
   state: {
-		isAuth: false,
     user: null,
-		sid: null,
   },
 
   mutations: {
-		set_cookie(state, sid) {
-			state.sid = sid
-		},
-		
     set_user(state, user) {
       state.user = user
     },
-
-		set_auth(state, isAuth) {
-			state.isAuth = isAuth
-		}
   },
 
   actions: {
     nuxtServerInit ({ commit }, { req }) {
-			// This runs in the server, so can't use Cookie.get
-			// coz that asks the client cookie in the browser
-			if (req.headers.cookie) {
-				let sid = req.headers.cookie.split(';')
-						.find(a => a.trim().startsWith('connect.sid'))
-
-				// console.log('found this:', sid)
-				// Actually, I think there is no need to store the cookie :P
-				if (sid)
-					commit('set_cookie', sid.split('=')[1])
-
-				if (req.session && req.session.isAuth === true)
-					commit('set_auth', req.session.isAuth)
+			if (req.session && req.session.public_user) {
+				commit('set_user', req.session.public_user)
+			} else {
+				commit('set_user', null)
 			}
 		},
 
@@ -55,12 +36,15 @@ const store = () => new Vuex.Store({
 			if (response.data.status == 'ne')
 				return Promise.reject(response.data.msg)
 
-			// aca hay un error, el axios no chapa la cookie que le retorna, pero
-			// uno no se da cuenta por el nuxtserverinit
-			console.log('response', response.headers)
-			
-			commit('set_cookie', Cookie.get('connect.sid'))
-			commit('set_auth', true)
+			commit('set_user', response.data)
+		},
+
+		async logout({commit}) {
+			// Need to tell server we're leaving :P
+			let response = await axios.get('/auth/logout')
+			console.log(response.data)
+
+			commit('set_user', null)
 		}
   }
 

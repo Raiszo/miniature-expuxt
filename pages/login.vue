@@ -16,7 +16,7 @@ export default {
 			password: ''
 		}
 	},
-
+	
 	methods: {
 		submit() {
 			this.$store.dispatch('login',{

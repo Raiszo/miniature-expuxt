@@ -9,9 +9,9 @@ router.post('/auth/login', (req,res) => {
 		// client little information
 
 		req.session.isAuth = true
-		req.session.user = { username: 'demo' , email: 'a@as.com' }
+		req.session.public_user = { username: 'demo' , email: 'a@as.com' }
 		
-		res.json({ username: 'demo' })
+		res.json({ username: 'demo', email: 'a@as.com' })
 		
   } else {
 		// to send a 401 and let axios resolve that, add special option
@@ -22,15 +22,23 @@ router.post('/auth/login', (req,res) => {
 })
 
 router.get('/auth/logout', (req,res) => {
-  delete req.session.authUser
-  res.json({ ok: true })
+  req.session.isAuth = false
+	delete req.session.public_user
+	
+  res.send({ status: 'ok' })
 })
 
 function isLogged(req,res,next) {
 	if (req.session.isAuth)
+		next()
+	else
+		res.json({ status: 'ne', msg: 'Bad credentials' })
 }
 
-router.get('/api/toy', (req,res) => {
+router.get('/api/toy', isLogged, (req,res) => {
+	// console.log(req.headers)
+
+	console.log('requesting dummy api')
 	res.send([
 		{
 			name: 'cs231n',
