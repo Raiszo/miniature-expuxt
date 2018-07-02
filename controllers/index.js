@@ -1,21 +1,34 @@
 const router = require('express').Router(),
 			User = require(__base + 'models/users')
 
-router.get('/auth/login', (req,res) => {
-	// console.log(req.body)
-	
-	// if (req.body.username === 'demo' && req.body.password === 'demo') {
-	req.session.user = { username: 'demo' }
-  res.json({ username: 'demo' })
-  // }
-	
-  // res.status(401).json({ error: 'Bad credentials' })
+router.post('/auth/login', (req,res) => {
+	console.log('server',req.body)
+
+	if (req.body.username === 'demo' && req.body.password === 'demo') {
+		// where deserializing get a lot of stuff, but send to
+		// client little information
+
+		req.session.isAuth = true
+		req.session.user = { username: 'demo' , email: 'a@as.com' }
+		
+		res.json({ username: 'demo' })
+		
+  } else {
+		// to send a 401 and let axios resolve that, add special option
+		// maybe in the plugins and then export axios from there
+		// res.status(401).json({ status: 'ne', msg: 'Bad credentials' })
+		res.json({ status: 'ne', msg: 'Bad credentials' })
+	}
 })
 
-router.post('/auth/logout', (req,res) => {
+router.get('/auth/logout', (req,res) => {
   delete req.session.authUser
   res.json({ ok: true })
 })
+
+function isLogged(req,res,next) {
+	if (req.session.isAuth)
+}
 
 router.get('/api/toy', (req,res) => {
 	res.send([

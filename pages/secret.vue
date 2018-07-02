@@ -7,12 +7,10 @@
 
 <script>
 export default {
-  // we use fetch() because we do not need to set data to this component
   fetch ({ store, redirect }) {
-		console.log('store:', store.state)
-    if (!store.state.user) {
-      return redirect('/')
+    if (!store.state.isAuth) {
+      return redirect('/login')
     }
-  }
+  },
 }
 </script>
